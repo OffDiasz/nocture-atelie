@@ -323,10 +323,12 @@
                 Nocturne Atelier
             </a>
 
+            <!-- Menu Desktop -->
             <ul class="hidden md:flex space-x-8">
                 <li><a href="#hero" class="nav-link text-lg text-gray-300 hover:text-white transition duration-200">Início</a></li>
+                <li><a href="#collections-intro" class="nav-link text-lg text-gray-300 hover:text-white transition duration-200">Nossas Coleções</a></li>
+                <li><a href="#collections" class="nav-link text-lg text-gray-300 hover:text-white transition duration-200">Destaques da Coleção</a></li>
                 <li><a href="#about" class="nav-link text-lg text-gray-300 hover:text-white transition duration-200">Sobre</a></li>
-                <li><a href="#collections-intro" class="nav-link text-lg text-gray-300 hover:text-white transition duration-200">Coleções</a></li>
                 <li><a href="#atelier" class="nav-link text-lg text-gray-300 hover:text-white transition duration-200">Ateliê</a></li>
                 <li><a href="#contact" class="nav-link text-lg text-gray-300 hover:text-white transition duration-200">Contato</a></li>
             </ul>
@@ -338,11 +340,13 @@
             </button>
         </nav>
 
+        <!-- Menu Mobile -->
         <div id="mobile-menu" class="hidden md:hidden bg-black bg-opacity-90 pt-4 pb-2">
             <ul class="flex flex-col items-center space-y-4">
                 <li><a href="#hero" class="nav-link text-lg text-gray-300 hover:text-white transition duration-200 py-2 block" onclick="toggleMobileMenu();">Início</a></li>
+                <li><a href="#collections-intro" class="nav-link text-lg text-gray-300 hover:text-white transition duration-200 py-2 block" onclick="toggleMobileMenu();">Nossas Coleções</a></li>
+                <li><a href="#collections" class="nav-link text-lg text-gray-300 hover:text-white transition duration-200 py-2 block" onclick="toggleMobileMenu();">Destaques da Coleção</a></li>
                 <li><a href="#about" class="nav-link text-lg text-gray-300 hover:text-white transition duration-200 py-2 block" onclick="toggleMobileMenu();">Sobre</a></li>
-                <li><a href="#collections-intro" class="nav-link text-lg text-gray-300 hover:text-white transition duration-200 py-2 block" onclick="toggleMobileMenu();">Coleções</a></li>
                 <li><a href="#atelier" class="nav-link text-lg text-gray-300 hover:text-white transition duration-200 py-2 block" onclick="toggleMobileMenu();">Ateliê</a></li>
                 <li><a href="#contact" class="nav-link text-lg text-gray-300 hover:text-white transition duration-200 py-2 block" onclick="toggleMobileMenu();">Contato</a></li>
             </ul>
@@ -411,11 +415,13 @@
     <section id="collections-intro" class="py-24 bg-gray-950">
         <div class="container mx-auto px-6 text-center">
             <h2 class="text-5xl font-bold text-white mb-12 reveal-element">Nossas Coleções</h2>
-            <div class="flex flex-col lg:flex-row items-center gap-12">
+            <!-- Alterado de items-center para items-start para alinhar o conteúdo no topo -->
+            <div class="flex flex-col lg:flex-row items-start gap-12"> 
                 <div class="lg:w-1/2 reveal-element">
                     <img src="imagens/mehrax-zYeUOlEDREY-unsplash.jpg" alt="Introdução da Coleção" class="rounded-lg shadow-2xl object-cover w-full h-auto">
                 </div>
-                <div class="lg:w-1/2 text-left reveal-element">
+                <!-- Aumentado de pt-28 para pt-32 para descer o texto mais um pouco e ajustado o botão -->
+                <div class="lg:w-1/2 text-left reveal-element pt-32"> 
                     <p class="text-lg text-gray-300 mb-6">
                         Cada coleção da Nocturne Atelier é uma ode à elegância noturna e à ousadia da moda contemporânea. Mergulhe em criações que transcendem o tempo, onde o luxo se encontra com a arte.
                     </p>
@@ -425,6 +431,10 @@
                     <p class="text-lg text-gray-300">
                         Descubra a coleção que fala à sua alma e vista a atitude que só a Nocturne Atelier pode oferecer.
                     </p>
+                    <!-- Novo botão com mt-16 para descer mais e text-center para centralizar -->
+                    <div class="mt-16 text-center"> 
+                        <a href="#" class="btn-primary inline-block">Explorar Mais Modelos</a>
+                    </div>
                 </div>
             </div>
         </div>
