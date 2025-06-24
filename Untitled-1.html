@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nocturne Atelier - Alta Costura Noturna</title>
+    <!-- Inclui o CDN do Tailwind CSS para usar as classes diretamente -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Define a fonte Inter para todo o corpo e estilos globais */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a; /* Fundo muito escuro */
+            color: #e0e0e0; /* Cor do texto claro */
+            margin: 0;
+            overflow-x: hidden; /* Evita rolagem horizontal */
+            line-height: 1.6; /* Garante boa legibilidade do texto */
+        }
+
+        /* Configuração para o scroll suave */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Classes personalizadas para animação de revelação */
+        .reveal-element {
+            opacity: 0;
+            transform: translateY(30px) scale(0.98);
+            transition: opacity 1s ease-out, transform 1s ease-out;
+        }
+
+        .reveal-element.is-visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* Estilo para links de navegação com hover */
+        .nav-link {
+            position: relative;
+            padding-bottom: 4px; /* Espaço para o sublinhado */
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 1px;
+            bottom: 0;
+            left: 50%;
+            background-color: #f7d188; /* Dourado sutil para o sublinhado */
+            transition: width 0.3s ease-out, left 0.3s ease-out;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+            left: 0;
+        }
+
+        /* Estilo para o botão principal */
+        /* Usamos as propriedades do @apply diretamente no CSS para compatibilidade */
+        .btn-primary {
+            background-color: transparent;
+            border: 1px solid #4b5563; /* border-gray-600 */
+            color: #e5e7eb; /* text-gray-200 */
+            padding: 0.75rem 2rem;
+            border-radius: 9999px; /* rounded-full */
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 600; /* font-semibold */
+            transition-property: background-color, border-color, transform;
+            transition-duration: 300ms; /* duration-300 */
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); /* ease-in-out */
+            box-shadow: 0 0 15px rgba(247, 210, 136, 0.2); /* Sutil brilho dourado */
+        }
+
+        .btn-primary:hover {
+            background-color: #1f2937; /* bg-gray-800 */
+            border-color: #6b7280; /* border-gray-500 */
+            transform: translateY(-2px); /* Pequeno movimento para cima ao passar o mouse */
+        }
+
+        /* Estilo para cartões de coleção */
+        .collection-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 0.75rem; /* rounded-lg */
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* shadow-xl */
+        }
+
+        .collection-card img {
+            width: 100%; /* w-full */
+            height: 800px; /* **Manter 800px como solicitado** */
+            object-fit: cover; /* object-cover */
+            transition: transform 0.4s ease-in-out; /* Transição para o zoom na imagem */
+        }
+
+        .collection-card:hover img {
+            transform: scale(1.05); /* Zoom sutil na imagem no hover */
+        }
+
+        .collection-card-overlay {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0; /* inset-0 */
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0)); /* Gradiente de opacidade para o texto */
+            display: flex;
+            align-items: flex-end; /* items-end */
+            padding: 1.5rem; /* p-6 */
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; /* Transição suave */
+            transform: translateY(100%); /* Esconde a sobreposição inicialmente */
+            box-sizing: border-box; /* Inclui padding na altura total */
+        }
+        
+        .collection-card:hover .collection-card-overlay {
+            opacity: 1;
+            transform: translateY(0); /* Mostra a sobreposição */
+        }
+
+        /* Animação para o texto do hero */
+        @keyframes slideInFromTop {
+            0% { transform: translateY(-50px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .hero-title {
+            animation: slideInFromTop 1s ease-out forwards;
+        }
+
+        .hero-subtitle {
+            animation: fadeIn 1.5s ease-out 0.5s forwards; /* Atraso para aparecer depois do título */
+            opacity: 0;
+        }
+
+        .hero-button {
+            animation: fadeIn 1.5s ease-out 1s forwards; /* Atraso para aparecer depois do subtítulo */
+            opacity: 0;
+        }
+
+        /* Estilos do Hero Carousel */
+        #hero {
+            position: relative; /* Para posicionar as setas e o conteúdo sobre o carrossel */
+            height: 100vh; /* Ocupa a altura total da viewport */
+            width: 100%;
+            overflow: hidden; /* Garante que apenas o slide atual seja visível */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .hero-carousel-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* Esconde os slides fora de vista */
+        }
+
+        .hero-carousel {
+            display: flex;
+            height: 100%;
+            transition: transform 1s ease-in-out; /* Transição suave entre os slides */
+        }
+
+        .hero-slide {
+            flex-shrink: 0; /* Impede que os slides encolham */
+            width: 100%; /* Cada slide ocupa 100% da largura do contêiner */
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            filter: brightness(0.7); /* Brilho inicial da imagem */
+            transition: filter 0.5s ease-in-out; /* Transição para o brilho da imagem */
+            position: relative; /* Para o overlay e conteúdo interno */
+            display: flex; /* Para centralizar o conteúdo dentro do slide */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .hero-slide-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4); /* Escurecimento sobre a imagem */
+        }
+        
+        .hero-slide-content {
+            position: relative; /* Para garantir que o conteúdo fique sobre o overlay */
+            z-index: 20; /* Acima do overlay */
+            color: white;
+            padding: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+        }
+
+        /* Setas de navegação do Carrossel Hero */
+        .hero-nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            border: none;
+            padding: 15px;
+            cursor: pointer;
+            z-index: 30; /* Acima dos slides e overlays, mas abaixo do header */
+            font-size: 2rem;
+            border-radius: 50%;
+            transition: background-color 0.3s ease;
+            display: flex; /* Para centralizar o ícone */
+            align-items: center;
+            justify-content: center;
+            width: 50px; /* Tamanho fixo para o círculo */
+            height: 50px;
+        }
+
+        .hero-nav-button:hover {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        #hero-prev {
+            left: 20px;
+        }
+
+        #hero-next {
+            right: 20px;
+        }
+
+        /* Indicadores de Página (bolinhas) */
+        .hero-indicators {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 30; /* Acima dos slides e overlays */
+        }
+
+        .hero-indicator-dot {
+            width: 12px;
+            height: 12px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .hero-indicator-dot.active {
+            background-color: #f7d188; /* Dourado sutil para o ativo */
+            transform: scale(1.2);
+        }
+
+        /* --- Estilos do Initial Logo Screen --- */
+        #initial-logo-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #0a0a0a; /* Fundo escuro */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999; /* Garante que fique acima de tudo */
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 1s ease-out, transform 1s ease-out; /* Transição para sumir */
+        }
+
+        #initial-logo-screen.fade-out {
+            opacity: 0;
+            transform: translateY(-100px); /* Sobe um pouco enquanto some */
+            pointer-events: none; /* Desabilita interações */
+        }
+
+        #initial-logo-screen.hidden {
+            display: none; /* Remove do fluxo após a transição */
+        }
+
+        .initial-logo-text {
+            font-size: 5rem; /* Tamanho grande para o logo */
+            font-weight: bold;
+            color: #f7d188; /* Dourado sutil */
+            animation: fadeIn 1.5s ease-out; /* Animação de entrada */
+            text-shadow: 0 0 15px rgba(247, 210, 136, 0.4); /* Brilho sutil */
+        }
+        .initial-slogan-text {
+            font-size: 1.5rem;
+            color: #e0e0e0;
+            margin-top: 10px;
+            animation: fadeIn 1.5s ease-out 0.5s forwards; /* Atraso para aparecer depois do logo */
+            opacity: 0;
+        }
+    </style>
+</head>
+<body class="leading-relaxed">
+
+    <!-- Tela de Logo Inicial (Pre-loader) -->
+    <div id="initial-logo-screen">
+        <h1 class="initial-logo-text">Nocturne Atelier</h1>
+        <p class="initial-slogan-text">A Sombra da Elegância. A Luz da Atitude.</p>
+    </div>
+
+    <!-- Cabeçalho Fixo -->
+    <header class="fixed top-0 left-0 w-full bg-black bg-opacity-70 z-50 py-4 backdrop-blur-sm shadow-lg">
+        <nav class="container mx-auto flex justify-between items-center px-6">
+            <a href="#hero" class="text-3xl font-bold text-gray-50 uppercase tracking-widest flex items-center">
+                <svg class="w-8 h-8 mr-2 text-f7d188" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                </svg>
+                Nocturne Atelier
+            </a>
+
+            <ul class="hidden md:flex space-x-8">
+                <li><a href="#hero" class="nav-link text-lg text-gray-300 hover:text-white transition duration-200">Início</a></li>
+                <li><a href="#about" class="nav-link text-lg text-gray-300 hover:text-white transition duration-200">Sobre</a></li>
+                <li><a href="#collections-intro" class="nav-link text-lg text-gray-300 hover:text-white transition duration-200">Coleções</a></li>
+                <li><a href="#atelier" class="nav-link text-lg text-gray-300 hover:text-white transition duration-200">Ateliê</a></li>
+                <li><a href="#contact" class="nav-link text-lg text-gray-300 hover:text-white transition duration-200">Contato</a></li>
+            </ul>
+
+            <button id="mobile-menu-button" class="md:hidden text-gray-300 hover:text-white focus:outline-none">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </nav>
+
+        <div id="mobile-menu" class="hidden md:hidden bg-black bg-opacity-90 pt-4 pb-2">
+            <ul class="flex flex-col items-center space-y-4">
+                <li><a href="#hero" class="nav-link text-lg text-gray-300 hover:text-white transition duration-200 py-2 block" onclick="toggleMobileMenu();">Início</a></li>
+                <li><a href="#about" class="nav-link text-lg text-gray-300 hover:text-white transition duration-200 py-2 block" onclick="toggleMobileMenu();">Sobre</a></li>
+                <li><a href="#collections-intro" class="nav-link text-lg text-gray-300 hover:text-white transition duration-200 py-2 block" onclick="toggleMobileMenu();">Coleções</a></li>
+                <li><a href="#atelier" class="nav-link text-lg text-gray-300 hover:text-white transition duration-200 py-2 block" onclick="toggleMobileMenu();">Ateliê</a></li>
+                <li><a href="#contact" class="nav-link text-lg text-gray-300 hover:text-white transition duration-200 py-2 block" onclick="toggleMobileMenu();">Contato</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- Seção Hero (Carrossel) -->
+    <section id="hero">
+        <div class="hero-carousel-container">
+            <div class="hero-carousel" id="hero-carousel">
+                <div class="hero-slide" style="background-image: url('https://placehold.co/1920x1080/1a1a1a/e0e0e0?text=Eleg%C3%A2ncia+Sem+Limites');">
+                    <div class="hero-slide-overlay"></div>
+                    <div class="hero-slide-content">
+                        <h1 class="hero-title text-6xl md:text-8xl font-extrabold text-white mb-6 uppercase tracking-wider leading-tight">
+                            Elegância Sem Limites
+                        </h1>
+                        <p class="hero-subtitle text-xl md:text-2xl text-gray-300 mb-10 leading-relaxed">
+                            Descubra nossa nova coleção, onde a arte e a moda se encontram.
+                        </p>
+                        <a href="#collections-intro" class="hero-button btn-primary inline-block">
+                            Ver Coleção
+                        </a>
+                    </div>
+                </div>
+
+                <div class="hero-slide" style="background-image: url('https://placehold.co/1920x1080/2b2b2b/e0e0e0?text=A+Sombra+da+Atitude');">
+                    <div class="hero-slide-overlay"></div>
+                    <div class="hero-slide-content">
+                        <h1 class="hero-title text-6xl md:text-8xl font-extrabold text-white mb-6 uppercase tracking-wider leading-tight">
+                            A Sombra da Atitude
+                        </h1>
+                        <p class="hero-subtitle text-xl md:text-2xl text-gray-300 mb-10 leading-relaxed">
+                            Peças exclusivas que definem o seu estilo noturno.
+                        </p>
+                        <a href="#collections" class="hero-button btn-primary inline-block">
+                            Destaques
+                        </a>
+                    </div>
+                </div>
+
+                <div class="hero-slide" style="background-image: url('https://placehold.co/1920x1080/3c3c3c/e0e0e0?text=Feito+para+Voc%C3%AA');">
+                    <div class="hero-slide-overlay"></div>
+                    <div class="hero-slide-content">
+                        <h1 class="hero-title text-6xl md:text-8xl font-extrabold text-white mb-6 uppercase tracking-wider leading-tight">
+                            Feito para Você
+                        </h1>
+                        <p class="hero-subtitle text-xl md:text-2xl text-gray-300 mb-10 leading-relaxed">
+                            Personalize sua experiência com a alta costura da Nocturne Atelier.
+                        </p>
+                        <a href="#atelier" class="hero-button btn-primary inline-block">
+                            Nosso Ateliê
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button class="hero-nav-button" id="hero-prev">&#10094;</button>
+        <button class="hero-nav-button" id="hero-next">&#10095;</button>
+
+        <div class="hero-indicators" id="hero-indicators">
+        </div>
+    </section>
+
+    <!-- Seção de Introdução às Coleções -->
+    <section id="collections-intro" class="py-24 bg-gray-950">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-5xl font-bold text-white mb-12 reveal-element">Nossas Coleções</h2>
+            <div class="flex flex-col lg:flex-row items-center gap-12">
+                <div class="lg:w-1/2 reveal-element">
+                    <img src="https://placehold.co/800x600/2a2a2a/e0e0e0?text=Introdu%C3%A7%C3%A3o+da+Cole%C3%A7%C3%A3o" alt="Introdução da Coleção" class="rounded-lg shadow-2xl object-cover w-full h-auto">
+                </div>
+                <div class="lg:w-1/2 text-left reveal-element">
+                    <p class="text-lg text-gray-300 mb-6">
+                        Cada coleção da Nocturne Atelier é uma ode à elegância noturna e à ousadia da moda contemporânea. Mergulhe em criações que transcendem o tempo, onde o luxo se encontra com a arte.
+                    </p>
+                    <p class="text-lg text-gray-300 mb-6">
+                        Desde silhuetas impecáveis até detalhes artesanais, cada peça é cuidadosamente elaborada para refletir a essência de quem as veste: confiante, misterioso e irresistivelmente chic.
+                    </p>
+                    <p class="text-lg text-gray-300">
+                        Descubra a coleção que fala à sua alma e vista a atitude que só a Nocturne Atelier pode oferecer.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Seção Destaques da Coleção (Mantida com 2x2 centralizado e 600x800) -->
+    <section id="collections" class="py-24 bg-gray-950">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-5xl font-bold text-white mb-16 reveal-element">Destaques da Coleção</h2>
+            <!-- Adicionada a classe 'justify-items-center' para centralizar os itens dentro de cada célula do grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-10 justify-items-center">
+                <div class="collection-card reveal-element">
+                    <img src="https://placehold.co/600x800/3a3a3a/e0e0e0?text=Jaqueta+Sombra+Furtiva" alt="Jaqueta Sombra Furtiva">
+                    <div class="collection-card-overlay">
+                        <div class="text-left text-white">
+                            <h3 class="text-3xl font-bold mb-2">Jaqueta Sombra Furtiva</h3>
+                            <p class="text-gray-300 text-lg">Com um corte impecável que desenha a silhueta, esta peça em couro premium personifica a elegância minimalista e a atitude subversiva.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collection-card reveal-element">
+                    <img src="https://placehold.co/600x800/4a4a4a/e0e0e0?text=Cal%C3%A7a+Cigarette+Perfeita" alt="Calça Cigarette Perfeita">
+                    <div class="collection-card-overlay">
+                        <div class="text-left text-white">
+                            <h3 class="text-3xl font-bold mb-2">A Calça Cigarette Perfeita</h3>
+                            <p class="text-gray-300 text-lg">Em couro ultra macio ou crepe, cintura alta para uma silhueta alongada e chic.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collection-card reveal-element">
+                    <img src="https://placehold.co/600x800/5a5a5a/e0e0e0?text=Jaqueta+de+Couro+Rebelde-Chic" alt="Jaqueta de Couro Rebelde-Chic">
+                    <div class="collection-card-overlay">
+                        <div class="text-left text-white">
+                            <h3 class="text-3xl font-bold mb-2">Jaqueta de Couro Rebelde-Chic</h3>
+                            <p class="text-gray-300 text-lg">Clássica com detalhes únicos: zíperes fumê, texturas e forro em seda escura.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collection-card reveal-element">
+                    <img src="https://placehold.co/600x800/6a6a6a/e0e0e0?text=Vestido+de+Seda+Meia-Noite" alt="Vestido de Seda Meia-Noite">
+                    <div class="collection-card-overlay">
+                        <div class="text-left text-white">
+                            <h3 class="text-3xl font-bold mb-2">Vestido de Seda Meia-Noite</h3>
+                            <p class="text-gray-300 text-lg">Corte fluido e minimalista, decote sutil ou fenda ousada. Para brilhar sob a lua.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-16 reveal-element">
+                <a href="#" class="btn-primary inline-block">Ver Todas as Coleções</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Seção Sobre a Nocturne Atelier -->
+    <section id="about" class="py-24 bg-gray-900">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-5xl font-bold text-white mb-12 reveal-element">Sobre a Nocturne Atelier</h2>
+            <div class="flex flex-col lg:flex-row items-center gap-12">
+                <div class="lg:w-1/2 reveal-element">
+                    <img src="https://placehold.co/600x800/2a2a2a/e0e0e0?text=Nossa+Filosofia" alt="Filosofia da Marca" class="rounded-lg shadow-2xl object-cover w-full h-auto">
+                </div>
+                <div class="lg:w-1/2 text-left reveal-element">
+                    <p class="text-lg text-gray-300 mb-6">
+                        O *Nocturne Atelier* celebra a beleza e o mistério da noite, a dicotomia entre a escuridão e a luz, o clássico e o subversivo, a força e a vulnerabilidade.
+                    </p>
+                    <p class="text-lg text-gray-300 mb-6">
+                        Cada peça é uma criação artesanal, projetada para aqueles que encontram beleza na imperfeição e poder na simplicidade. Não se trata apenas de vestir, mas de encarnar uma atitude e abraçar a elegância que a noite oferece.
+                    </p>
+                    <p class="text-lg text-gray-300">
+                        Nossa inspiração vem da sofisticação parisiense misturada à atitude rock'n-roll, do cinema noir e dos bastidores de shows de rock alternativos, onde a elegância e a rebeldia se encontram.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Seção O Coração da Criação: Nosso Ateliê -->
+    <section id="atelier" class="py-24 bg-gray-900">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-5xl font-bold text-white mb-12 reveal-element">O Coração da Criação: Nosso Ateliê</h2>
+            <div class="flex flex-col lg:flex-row-reverse items-center gap-12">
+                <div class="lg:w-1/2 reveal-element">
+                    <img src="https://placehold.co/800x600/333333/e0e0e0?text=O+Ateli%C3%AA+Nocturne" alt="Ateliê Nocturne Atelier" class="rounded-lg shadow-2xl object-cover w-full h-auto">
+                </div>
+                <div class="lg:w-1/2 text-left reveal-element">
+                    <p class="text-lg text-gray-300 mb-6">
+                        No coração da Nocturne Atelier reside a arte da alta costura. Nosso ateliê é um santuário de precisão e paixão, onde cada peça é concebida e executada com um cuidado meticuloso, garantindo a mais alta qualidade e um acabamento impecável.
+                    </p>
+                    <p class="text-lg text-gray-300 mb-6">
+                        Utilizamos apenas os materiais mais finos — couros suntuosos, sedas fluidas e veludos luxuosos — transformados pelas mãos de artesãos experientes. Cada costura, cada detalhe, reflete a dedicação à perfeição que define a nossa marca.
+                    </p>
+                    <p class="text-lg text-gray-300">
+                        É aqui que a filosofia da "Nocturne Atelier" ganha vida, onde a inspiração noturna se funde com a mestria artesanal para criar vestuário que não é apenas moda, mas uma extensão da sua identidade.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Seção Entre em Contato -->
+    <section id="contact" class="py-24 bg-gray-950">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-5xl font-bold text-white mb-12 reveal-element">Entre em Contato</h2>
+            <p class="text-lg text-gray-300 mb-10 reveal-element">
+                Estamos localizados nos corações pulsantes da moda global. Visite-nos ou entre em contato para agendar um atendimento exclusivo.
+            </p>
+            <div class="flex flex-col lg:flex-row justify-center items-start gap-12">
+                <div class="lg:w-1/3 text-left reveal-element">
+                    <h3 class="text-3xl font-semibold text-white mb-4">Atendimento ao Cliente</h3>
+                    <p class="text-gray-300 mb-2">E-mail: <a href="mailto:contato@nocturneat.com" class="hover:text-white transition duration-200">contato@nocturneat.com</a></p>
+                    <p class="text-gray-300">Telefone: +55 (11) 98765-4321</p>
+                </div>
+                <div class="lg:w-1/3 text-left reveal-element">
+                    <h3 class="text-3xl font-semibold text-white mb-4">Localização Principal</h3>
+                    <p class="text-gray-300 mb-2">Rua da Alta Costura, 123</p>
+                    <p class="text-gray-300">Cidade da Moda, Paris, França</p>
+                    <p class="text-gray-300 mt-4">
+                        <a href="#" class="inline-flex items-center text-gray-400 hover:text-white transition duration-200">
+                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg>
+                            Ver no Mapa
+                        </a>
+                    </p>
+                </div>
+                <div class="lg:w-1/3 text-left reveal-element">
+                    <h3 class="text-3xl font-semibold text-white mb-4">Siga-nos</h3>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition duration-200" aria-label="Instagram">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7.942 2C4.654 2 2 4.654 2 7.942v8.116C2 19.346 4.654 22 7.942 22h8.116C19.346 22 22 19.346 22 16.058V7.942C22 4.654 19.346 2 16.058 2H7.942zm8.116 2a1.59 1.59 0 110 3.181 1.59 1.59 0 010-3.181zM12 7c-2.761 0-5 2.239-5 5s2.239 5 5 5 5-2.239 5-5-2.239-5-5-5zm0 2c1.654 0 3 1.346 3 3s-1.346 3-3 3-3-1.346-3-3 1.346-3 3-3z"></path></svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition duration-200" aria-label="Facebook">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.959.192-1.333 1.103-1.333h2.897v-5h-3.99c-3.123 0-5.012 2.153-5.012 4.967v2.033z"></path></svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition duration-200" aria-label="Twitter">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.593 0-6.494 2.901-6.494 6.492 0 .511.054 1.006.155 1.481-5.393-.272-10.187-2.855-13.387-6.776-.554.954-.877 2.066-.877 3.245 0 2.248 1.157 4.234 2.91 5.392-.807-.025-1.568-.246-2.228-.616v.081c0 3.153 2.225 5.792 5.176 6.378-.54.148-1.112.23-1.702.23-.418 0-.825-.04-1.222-.116.829 2.046 3.209 3.542 6.046 3.583-2.22 1.745-5.034 2.771-8.094 2.771-.532 0-1.052-.03-1.56-.091 2.879 1.849 6.29 2.924 9.94 2.924C19.348 23.991 24 18.232 24 11.661c0-.181-.004-.362-.012-.541.828-.598 1.547-1.344 2.118-2.197z"></path></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Rodapé -->
+    <footer class="bg-black py-12">
+        <div class="container mx-auto px-6 text-center text-gray-400">
+            <p>&copy; 2024 Nocturne Atelier. Todos os direitos reservados.</p>
+            <div class="mt-4 text-sm">
+                <a href="#" class="hover:text-white mx-2 transition duration-200">Política de Privacidade</a> |
+                <a href="#" class="hover:text-white mx-2 transition duration-200">Termos de Serviço</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Function to toggle mobile menu
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        }
+
+        // Add listener to mobile menu button
+        document.getElementById('mobile-menu-button').addEventListener('click', toggleMobileMenu);
+
+        // JavaScript for "reveal-element" effect on scroll
+        const revealElements = document.querySelectorAll('.reveal-element');
+
+        const revealOptions = {
+            threshold: 0.2, // When 20% of the element is visible
+            rootMargin: "0px 0px -50px 0px" // Adjust to load earlier
+        };
+
+        const revealOnScroll = new IntersectionObserver(function(
+            entries,
+            revealOnScroll
+        ) {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) {
+                    return;
+                } else {
+                    entry.target.classList.add('is-visible');
+                    revealOnScroll.unobserve(entry.target); // Stop observing after it appears
+                }
+            });
+        }, revealOptions);
+
+        revealElements.forEach(element => {
+            revealOnScroll.observe(element);
+        });
+
+        // --- Hero Carousel JavaScript ---
+        const heroCarousel = document.getElementById('hero-carousel');
+        const heroSlides = document.querySelectorAll('.hero-slide');
+        const heroPrevBtn = document.getElementById('hero-prev');
+        const heroNextBtn = document.getElementById('hero-next');
+        const heroIndicatorsContainer = document.getElementById('hero-indicators');
+
+        let currentSlideIndex = 0;
+        const totalSlides = heroSlides.length;
+
+        // Function to update carousel display
+        function updateHeroCarousel() {
+            const offset = -currentSlideIndex * 100;
+            heroCarousel.style.transform = `translateX(${offset}%)`;
+
+            // Update indicators
+            updateHeroIndicators();
+        }
+
+        // Function to create and update indicators (dots)
+        function updateHeroIndicators() {
+            heroIndicatorsContainer.innerHTML = ''; // Clear existing dots
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.classList.add('hero-indicator-dot');
+                if (i === currentSlideIndex) {
+                    dot.classList.add('active');
+                }
+                dot.addEventListener('click', () => {
+                    currentSlideIndex = i;
+                    updateHeroCarousel();
+                    stopAutoPlay(); // Stop auto-play on manual navigation
+                    startAutoPlay(); // Restart auto-play after manual navigation
+                });
+                heroIndicatorsContainer.appendChild(dot);
+            }
+        }
+
+        // Navigate to next slide
+        function showNextSlide() {
+            currentSlideIndex = (currentSlideIndex + 1) % totalSlides;
+            updateHeroCarousel();
+        }
+
+        // Navigate to previous slide
+        function showPrevSlide() {
+            currentSlideIndex = (currentSlideIndex - 1 + totalSlides) % totalSlides;
+            updateHeroCarousel();
+        }
+
+        // Add event listeners for carousel buttons
+        heroNextBtn.addEventListener('click', () => {
+            showNextSlide();
+            stopAutoPlay(); // Stop auto-play on manual navigation
+            startAutoPlay(); // Restart auto-play after manual navigation
+        });
+        heroPrevBtn.addEventListener('click', () => {
+            showPrevSlide();
+            stopAutoPlay(); // Stop auto-play on manual navigation
+            startAutoPlay(); // Restart auto-play after manual navigation
+        });
+
+        // Auto-play feature
+        let autoPlayInterval;
+        const autoPlayDelay = 5000; // 5 seconds
+
+        function startAutoPlay() {
+            stopAutoPlay(); // Clear any existing interval
+            autoPlayInterval = setInterval(showNextSlide, autoPlayDelay);
+        }
+
+        function stopAutoPlay() {
+            clearInterval(autoPlayInterval);
+        }
+
+        // --- Initial Logo Screen JavaScript ---
+        const initialLogoScreen = document.getElementById('initial-logo-screen');
+        const initialLogoDuration = 3000; // 3 seconds for logo display
+
+        // Function to hide the initial logo screen
+        function hideInitialLogoScreen() {
+            initialLogoScreen.classList.add('fade-out');
+            initialLogoScreen.addEventListener('transitionend', () => {
+                initialLogoScreen.classList.add('hidden'); // Fully remove after fade-out
+                document.body.style.overflowY = 'auto'; // Re-enable page scroll
+                updateHeroCarousel(); // Initialize Hero Carousel
+                startAutoPlay(); // Start auto-play for Hero Carousel
+            }, { once: true }); // Ensure listener runs only once
+        }
+
+        // On page load, show the initial logo screen, then hide it
+        window.addEventListener('load', () => {
+            document.body.style.overflowY = 'hidden'; // Lock scroll during initial logo screen
+            setTimeout(hideInitialLogoScreen, initialLogoDuration);
+        });
+
+        // The global scroll listener is no longer needed for the hero transitions
+        // because the hero is now a standard carousel.
+        // The reveal-element IntersectionObserver is still used for later sections.
+    </script>
+</body>
+</html>
